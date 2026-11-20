@@ -1,6 +1,6 @@
 {
   "name": "@i2v-ai/cli",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "i2v.ai command-line tools and local stdio MCP server",
   "license": "MIT",
   "type": "module",

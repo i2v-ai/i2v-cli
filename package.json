@@ -1,0 +1,21 @@
+{
+  "name": "@i2v-ai/cli",
+  "version": "1.2.0",
+  "description": "i2v.ai command-line tools and local stdio MCP server",
+  "license": "MIT",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/i2v-ai/i2v-agent-tools.git",
+    "directory": "packages/cli"
+  },
+  "bin": { "i2v": "./bin/i2v-cli.mjs" },
+  "files": ["bin"],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node ./bin/i2v-cli.mjs --help",
+    "prepack": "npm run build"
+  },
+  "publishConfig": { "access": "public", "tag": "next" }
+}

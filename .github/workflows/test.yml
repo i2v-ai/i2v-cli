@@ -1,0 +1,21 @@
+name: Test the CLI
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    strategy:
+      matrix:
+        node: [20, 22, 24]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm run build
+      - run: node bin/i2v-cli.mjs --version
+      - run: node bin/i2v-cli.mjs --help > /dev/null
+      - run: node bin/i2v-cli.mjs list --type image --json | head -c 200

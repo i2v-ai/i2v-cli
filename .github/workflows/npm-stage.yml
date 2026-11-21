@@ -55,4 +55,4 @@ jobs:
       - name: Stage for maintainer review
         env:
           EXPECTED_VERSION: ${{ inputs.version }}
-        run: npm stage publish packed/*.tgz --access public --tag next
+        run: npm stage publish "$PWD"/packed/*.tgz --access public --tag next

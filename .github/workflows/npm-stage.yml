@@ -45,6 +45,8 @@ jobs:
       - run: npm run build
       - run: node bin/i2v-cli.mjs --version
       - name: Pack and check the archive
+        env:
+          EXPECTED_SHA256: ${{ inputs.sha256 }}
         run: |
           mkdir packed
           npm pack --pack-destination "$PWD/packed"

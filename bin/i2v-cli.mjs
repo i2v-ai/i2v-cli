@@ -28,7 +28,7 @@ import { pipeline } from 'node:stream/promises';
 import { setTimeout as delay } from 'node:timers/promises';
 import { parseArgs } from 'node:util';
 
-const VERSION = '1.2.1';
+const VERSION = '1.2.2';
 const DEFAULT_ORIGIN = 'https://i2v.ai';
 const SUBMISSION_TIMEOUT = 18_000;
 const MODEL_ID = /^[a-z0-9][a-z0-9._-]{0,127}$/i;
@@ -924,13 +924,16 @@ async function callLocal(name, args, protocol) {
   if (name === 'create_task') {
     if (args.maxCredits !== undefined)
       throw invalid('Use a USD spending ceiling in maxCostUsd.');
+    if (args.callBackUrl !== undefined)
+      throw invalid(
+        'The local stdio MCP server does not accept callBackUrl. Use the remote MCP server or the REST API to register a webhook.'
+      );
     const {
       modelId,
       inputs,
       maxCostUsd,
       idempotencyKey,
       replay,
-      callBackUrl,
       autoFix,
       expectedRevision,
       recoveryScope,
@@ -944,7 +947,6 @@ async function callLocal(name, args, protocol) {
         maxCostUsd,
         idempotencyKey,
         replay,
-        callBackUrl,
         autoFix,
         expectedRevision,
         recoveryScope,

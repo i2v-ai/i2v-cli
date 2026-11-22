@@ -6,15 +6,18 @@ on:
         description: Expected package.json version
         required: true
       sha256:
-        description: SHA-256 of the reviewed tarball from the GitHub release
-        required: true
+        description: SHA-256 of the reviewed tarball from the GitHub release. Leave empty to only move a dist-tag on an already published version.
+        required: false
+      dist_tag:
+        description: Dist-tag to stage under, for example next for a prerelease. Empty stages under the npm default, latest. With no SHA-256 this instead moves the tag on the published version.
+        required: false
 permissions: {}
 concurrency:
   group: npm-stage
   cancel-in-progress: false
 jobs:
   stage:
-    if: github.ref == 'refs/heads/main'
+    if: inputs.sha256 != ''
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -54,5 +57,37 @@ jobs:
           printf '%s  %s\n' "${EXPECTED_SHA256,,}" "$archive" | sha256sum --check
       - name: Stage for maintainer review
         env:
+          DIST_TAG: ${{ inputs.dist_tag }}
+        run: |
+          if [[ -n "$DIST_TAG" && ! "$DIST_TAG" =~ ^[a-z][a-z0-9.-]*$ ]]; then
+            printf 'Enter a lowercase dist-tag such as next.\n' >&2
+            exit 1
+          fi
+          args=(--access public)
+          if [[ -n "$DIST_TAG" ]]; then
+            args+=(--tag "$DIST_TAG")
+          fi
+          npm stage publish "$PWD"/packed/*.tgz "${args[@]}"
+  promote:
+    if: inputs.sha256 == '' && inputs.dist_tag != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24.15.0
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - run: npm install --global --ignore-scripts npm@11.21.3
+      - name: Move the dist-tag
+        env:
           EXPECTED_VERSION: ${{ inputs.version }}
-        run: npm stage publish "$PWD"/packed/*.tgz --access public --tag next
+          DIST_TAG: ${{ inputs.dist_tag }}
+        run: |
+          if [[ ! "$DIST_TAG" =~ ^[a-z][a-z0-9.-]*$ ]]; then
+            printf 'Enter a lowercase dist-tag such as latest.\n' >&2
+            exit 1
+          fi
+          npm dist-tag add "@i2v-ai/cli@${EXPECTED_VERSION}" "$DIST_TAG"

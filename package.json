@@ -23,8 +23,7 @@
     "prepack": "npm run build"
   },
   "publishConfig": {
-    "access": "public",
-    "tag": "next"
+    "access": "public"
   },
   "homepage": "https://i2v.ai/cli",
   "bugs": {
